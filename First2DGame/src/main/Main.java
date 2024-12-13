@@ -18,6 +18,7 @@ public class Main {
 		window.setLocationRelativeTo(null); // 화면 가운데 뜸 (뜨는데 지정 null)
 		window.setVisible(true); // 창 띄우기
 		
+		gamePanel.setupGame(); // 오브젝트 띄우기
 		gamePanel.startGameThread(); // 패널 켜지면 스레드 돌리기
 	}
 

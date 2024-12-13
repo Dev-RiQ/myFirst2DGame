@@ -15,5 +15,6 @@ public class Entity {
 	public int spriteNum = 1; // 모션 변경 시점 측정 변수
 	
 	public Rectangle solidArea; // 히트박스
+	public int solidAreaDefaultX, solidAreaDefaultY; // 오브젝트용
 	public boolean collisionOn = false;
 }

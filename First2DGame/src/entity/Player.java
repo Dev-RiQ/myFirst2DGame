@@ -17,6 +17,7 @@ public class Player extends Entity{
 	//보여지는 화면
 	public final int screenX;
 	public final int screenY;
+	public int hasKey = 0; // 키 갯수
 	int standCounter = 0;
 	// 화면 표시와 행동에 영향을 주는 요인 적용
 	public Player(GamePanel gp, KeyHandler keyH) {
@@ -27,10 +28,12 @@ public class Player extends Entity{
 		screenY = gp.screenHeight/2 - (gp.tileSize/2);
 		// 캐릭터 히트박스 범위
 		solidArea = new Rectangle();
-		solidArea.x = 0 + 23;
-		solidArea.y = 0 + 23;
-		solidArea.width = gp.tileSize - 46;
-		solidArea.height = gp.tileSize - 30;
+		solidArea.x = 0 + 8;
+		solidArea.y = 0 + 16;
+		solidAreaDefaultX = solidArea.x; // 오브젝트 히트박스
+		solidAreaDefaultY = solidArea.y;
+		solidArea.width = gp.tileSize - 16;
+		solidArea.height = gp.tileSize - 16;
 		
 		setDefaultValues(); // 현재 캐릭터 정보 로드
 		getPlayerImage(); // 요인에 따른 이미지 출력
@@ -75,6 +78,9 @@ public class Player extends Entity{
 			// 콜리젼 체크
 			collisionOn = false;
 			gp.cChecker.checkTile(this);
+			// 오브젝트 콜리전 체크
+			int objIndex = gp.cChecker.checkObject(this, true);
+			pickUpObject(objIndex);
 			// 콜리젼 아닌 곳 이동 가능
 			if(collisionOn == false) {
 				switch(direction) {
@@ -109,6 +115,41 @@ public class Player extends Entity{
 			if(standCounter == 20) {
 				spriteNum = 1;
 				standCounter = 0;
+			}
+		}
+	}
+	// 오브젝트 닿을 때 변화
+	public void pickUpObject(int i) {
+		if(i != 999) {
+			String objectName = gp.obj[i].name;
+			switch(objectName) {
+			case "Key":
+				gp.playSE(1);
+				hasKey++;
+				gp.obj[i] = null; // 사용한 오브젝트 처리
+				gp.ui.showMessage("You got a key !");
+				break;
+			case "Door":
+				if(hasKey > 0) {
+					gp.playSE(3);
+					gp.obj[i] = null;
+					gp.ui.showMessage("You open the door !");
+					hasKey--;
+				}else {
+					gp.ui.showMessage("You need a key !");
+				}
+				break;
+			case "Boots":
+				gp.playSE(2);
+				speed += 2;
+				gp.obj[i] = null;
+				gp.ui.showMessage("Speed up !");
+				break;
+			case "Chest":
+				gp.ui.gameFinished = true;
+				gp.stopMusic();
+				gp.playSE(4);
+				break;
 			}
 		}
 	}

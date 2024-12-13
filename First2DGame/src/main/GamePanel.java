@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import javax.swing.JPanel;
 
 import entity.Player;
+import object.SuperObject;
 import tile.TileManager;
 
 public class GamePanel extends JPanel implements Runnable {
@@ -25,18 +26,21 @@ public class GamePanel extends JPanel implements Runnable {
 	// 월드 세팅
 	public final int maxWorldCol = 50;
 	public final int maxWorldRow = 50;
-	public final int worldWidth = tileSize * maxWorldCol;
-	public final int worldHeight = tileSize * maxWorldRow;
-	
 	
 	//FPS
 	int FPS = 60;
 	
 	TileManager tileM = new TileManager(this); // 맵 세팅
 	KeyHandler keyH = new KeyHandler(); // 키 조작 세팅
-	Thread gameThread; // 계속 진행되게 만듬
+	Sound music = new Sound();
+	Sound se = new Sound();
 	public CollisionChecker cChecker = new CollisionChecker(this); // 콜리전 체크
+	public AssetSetter aSetter = new AssetSetter(this);
+	public UI ui = new UI(this);
+	Thread gameThread; // 계속 진행되게 만듬
+	// 캐릭터, 오브젝트
 	public Player player = new Player(this,keyH); // 캐릭터 세팅
+	public SuperObject obj[] = new SuperObject[10]; // 오트젝트 10개 쓸거임 (많아지면 느려짐)
 	
 	// 기본 화면 세팅
 	public GamePanel() {
@@ -45,6 +49,11 @@ public class GamePanel extends JPanel implements Runnable {
 		this.setDoubleBuffered(true); // 화면 전환 부드럽게
 		this.addKeyListener(keyH); // 키보드 먹게
 		this.setFocusable(true); // 해당 패널이 우선으로 키 이벤트 포커싱
+	}
+	// 오브젝트 생성
+	public void setupGame() {
+		aSetter.setObject();
+		playMusic(0); // 배경음 출력
 	}
 	// 시작하면 스레드 동작
 	public void startGameThread() {
@@ -89,8 +98,26 @@ public class GamePanel extends JPanel implements Runnable {
 		Graphics2D g2 = (Graphics2D)g; // 형 변환
 		// 타일 먼저해야 레이어 상으로 캐릭터가 위로옴
 		tileM.draw(g2); // 배경 그리기
+		for(int i = 0; i < obj.length; i++) { // 오브젝트 그리기
+			if(obj[i] != null) { // 에러 방지
+				obj[i].draw(g2, this);
+			}
+		}
 		player.draw(g2); // 캐릭터 그리기
+		ui.draw(g2); // UI 그리기
 		g2.dispose(); // 겹치기 방지 종료 (해당 컴포넌트만), exit() 하면 다꺼짐
 	}
 	
+	public void playMusic(int i) { //베경음
+		music.setFile(i);
+		music.play();
+		music.loop();
+	}
+	public void stopMusic() {
+		music.stop();
+	}
+	public void playSE(int i) { // 효과음 (단발성)
+		se.setFile(i);
+		se.play();
+	}
 }
